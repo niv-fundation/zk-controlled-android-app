@@ -2,11 +2,13 @@ package com.example.simplewallet
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -53,8 +55,10 @@ class MainActivity : AppCompatActivity() {
 fun App() {
     val context = LocalContext.current
 
+    val isSystemDarkTheme = isSystemInDarkTheme()
+
     var isPrivateKeySaved by rememberSaveable { mutableStateOf(false) }
-    var isDarkThemeEnabled by remember { mutableStateOf(false) }
+    var isDarkThemeEnabled by remember { mutableStateOf(isSystemDarkTheme) }
 
     var isBiometricsEnabled by rememberSaveable { mutableStateOf(isBiometricsEnabled(context)) }
     var isBiometricSupported by remember { mutableStateOf(false) }
@@ -76,7 +80,6 @@ fun App() {
                 onSuccess = { isAuthenticated = true },
                 onFailure = { errorMessage ->
                     Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                    // Exit application gracefully
                     (context as? Activity)?.finish()
                 }
             )
@@ -84,6 +87,9 @@ fun App() {
             isAuthenticated = true
         }
     }
+
+    Log.d("SimpleWallet", "isAuthenticated: $isAuthenticated")
+    Log.d("SimpleWallet", "privateKey: ${getPrivateKey(context)}")
 
     if (isAuthenticated) {
         AppTheme(darkTheme = isDarkThemeEnabled) {
@@ -204,6 +210,7 @@ fun InteractionScreen(
 
                 SelectedNavigationElement.Settings -> {
                     SettingsScreen(
+                        context = LocalContext.current,
                         isBiometricsEnabled = isBiometricsEnabled,
                         onBiometricsToggle = onBiometricsToggle,
                         isDarkThemeEnabled = isDarkThemeEnabled,

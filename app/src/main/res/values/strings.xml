@@ -17,4 +17,5 @@
     <string name="simple_wallet_title">Simple Wallet</string>
     <string name="account_icon_content_desc">Account Icon</string>
     <string name="transaction_icon_content_desc">Transaction Icon</string>
+    <string name="log_out">Log Out</string>
 </resources>
