@@ -88,9 +88,6 @@ fun App() {
         }
     }
 
-    Log.d("SimpleWallet", "isAuthenticated: $isAuthenticated")
-    Log.d("SimpleWallet", "privateKey: ${getPrivateKey(context)}")
-
     if (isAuthenticated) {
         AppTheme(darkTheme = isDarkThemeEnabled) {
             Scaffold(
