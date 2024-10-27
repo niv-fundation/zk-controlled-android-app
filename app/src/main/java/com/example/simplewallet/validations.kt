@@ -3,6 +3,8 @@ package com.example.simplewallet
 import java.math.BigDecimal
 import java.math.BigInteger
 
+val Q = BigInteger("21888242871839275222246405745257275088696311157297823662689037894645226208583", 10)
+
 fun validatePrivateKey(input: String): String? {
     if (input.isEmpty()) return "Private key cannot be empty"
 
@@ -24,6 +26,10 @@ fun validatePrivateKey(input: String): String? {
 
     if (bigInt < minKeySize) {
         return "Private key is too short; must be at least 128 bits"
+    }
+
+    if (bigInt > Q) {
+        return "Private key is too large"
     }
 
     return null

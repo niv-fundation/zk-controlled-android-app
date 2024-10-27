@@ -18,4 +18,7 @@
     <string name="account_icon_content_desc">Account Icon</string>
     <string name="transaction_icon_content_desc">Transaction Icon</string>
     <string name="log_out">Log Out</string>
+    <string name="loading_account_address">Fetching predicted address…</string>
+    <string name="transaction_title">Transaction</string>
+    <string name="transaction_status_completed">Confirmed</string>
 </resources>

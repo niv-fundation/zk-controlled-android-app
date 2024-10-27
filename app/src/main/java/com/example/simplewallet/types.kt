@@ -5,10 +5,3 @@ enum class SelectedNavigationElement {
     Send,
     Settings
 }
-
-data class Transaction(
-    val title: String,
-    val amount: String,
-    val status: String,
-    val date: Long
-)

@@ -80,6 +80,36 @@ fun isBiometricsEnabled(context: Context): Boolean {
     return sharedPreferences.getBoolean(BuildConfig.BIOMETRICS_ENABLED_KEY, false)
 }
 
+fun saveAccountAddress(context: Context, accountAddress: String) {
+    val sharedPreferences =
+        context.getSharedPreferences(BuildConfig.APP_PREFERENCES, Context.MODE_PRIVATE)
+    with(sharedPreferences.edit()) {
+        putString(BuildConfig.ACCOUNT_ADDRESS_KEY, accountAddress)
+        apply()
+    }
+}
+
+fun getAccountAddress(context: Context): String? {
+    val sharedPreferences =
+        context.getSharedPreferences(BuildConfig.APP_PREFERENCES, Context.MODE_PRIVATE)
+    return sharedPreferences.getString(BuildConfig.ACCOUNT_ADDRESS_KEY, null)
+}
+
+fun saveAccountBalance(context: Context, accountBalance: String) {
+    val sharedPreferences =
+        context.getSharedPreferences(BuildConfig.APP_PREFERENCES, Context.MODE_PRIVATE)
+    with(sharedPreferences.edit()) {
+        putString(BuildConfig.ACCOUNT_BALANCE_KEY, accountBalance)
+        apply()
+    }
+}
+
+fun getAccountBalance(context: Context): String {
+    val sharedPreferences =
+        context.getSharedPreferences(BuildConfig.APP_PREFERENCES, Context.MODE_PRIVATE)
+    return sharedPreferences.getString(BuildConfig.ACCOUNT_BALANCE_KEY, null) ?: "..."
+}
+
 fun logOutAndRestartApp(context: Context) {
     clearUserData(context)
 

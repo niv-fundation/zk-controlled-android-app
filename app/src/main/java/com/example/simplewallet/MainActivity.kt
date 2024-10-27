@@ -146,33 +146,11 @@ fun InteractionScreen(
 ) {
     var currentSelectedNavigationElement by remember { mutableStateOf(SelectedNavigationElement.Home) }
 
-    var accountAddress by remember { mutableStateOf("0xf41ceE234219D6cc3d90A6996dC3276aD378cfCF") }
-    var accountBalance by remember { mutableStateOf("1.5 ETH") }
-
-    var transactions by remember { mutableStateOf(listOf<Transaction>()) }
-
-    transactions = transactions.plus(
-        listOf(
-            Transaction(
-                title = "Sent ETH",
-                amount = "-0.1 ETH",
-                status = "Completed",
-                date = System.currentTimeMillis()
-            ),
-            Transaction(
-                title = "Received ETH",
-                amount = "+0.5 ETH",
-                status = "Confirmed",
-                date = System.currentTimeMillis() - 1000 * 60 * 60 * 24
-            ),
-            Transaction(
-                title = "Sent ETH",
-                amount = "-0.2 ETH",
-                status = "Completed",
-                date = System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 2
-            ),
-        )
-    )
+    val privateKey = getPrivateKey(LocalContext.current)
+    if (privateKey == null) {
+        Log.e("InteractionScreen", "Private key is null")
+        return
+    }
 
     Scaffold(
         modifier = modifier,
@@ -193,11 +171,7 @@ fun InteractionScreen(
             when (currentSelectedNavigationElement) {
                 SelectedNavigationElement.Home -> {
                     HomeScreen(
-                        accountAddress,
-                        accountBalance,
-                        modifier = Modifier.fillMaxSize(),
-                        transactions = transactions,
-                        onLoadMoreTransaction = {}
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
