@@ -1,5 +1,7 @@
 package com.example.simplewallet
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,12 +18,43 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.gson.GsonBuilder
+
+fun handleSendEthClick(
+    context: Context,
+    recipientAddress: String,
+    amount: String
+) {
+    val privateKey = getPrivateKey(context)
+    if (privateKey == null) {
+        Log.e("InteractionScreen", "Private key is null")
+        return
+    }
+
+    getSendETHInputs(privateKey, recipientAddress, amount, onResult = {
+        val inputs = AuthProofInput.fromJson(it)
+
+        val proof = ZKPUseCase(context, context.assets).generateZKP(
+            "IdentityAuth.zkey",
+            R.raw.auth_dat,
+            inputs.toJson().toByteArray(),
+            ZKPUtil::auth
+        )
+
+        sendETH(privateKey, recipientAddress, amount, proof.proof.toJson(), onResult = { txHash ->
+            Log.d("InteractionScreen", "ETH sent successfully: $txHash")
+        })
+    })
+}
 
 @Composable
 fun SendScreen(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+
     var recipientAddress by rememberSaveable { mutableStateOf("") }
     var amount by rememberSaveable { mutableStateOf("") }
 
@@ -79,7 +112,7 @@ fun SendScreen(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { },
+            onClick = { handleSendEthClick(context, recipientAddress, amount) },
             enabled = addressErrorMessage == null && amountErrorMessage == null,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(

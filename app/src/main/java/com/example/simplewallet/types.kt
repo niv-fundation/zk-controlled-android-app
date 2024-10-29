@@ -14,6 +14,11 @@ data class Proof(
     val pi_c: List<String>,
     val protocol: String,
 ) {
+    fun toJson(): String {
+        val gson = Gson()
+        return gson.toJson(this)
+    }
+
     companion object {
         fun fromJson(jsonString: String): Proof {
             val json = Gson().fromJson(jsonString, Proof::class.java)

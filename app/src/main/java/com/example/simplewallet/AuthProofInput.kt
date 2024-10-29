@@ -44,4 +44,11 @@ data class AuthProofInput(
             "signatureS" to signatureS.toString()
         )
     }
+
+    companion object {
+        fun fromJson(jsonString: String): AuthProofInput {
+            val json = Gson().fromJson(jsonString, AuthProofInput::class.java)
+            return json
+        }
+    }
 }

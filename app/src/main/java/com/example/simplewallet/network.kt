@@ -51,20 +51,76 @@ fun getTransactionHistory(
 fun getPredictedAccountAddressAndBalance(
     context: Context,
     privateKey: String,
-    eventId: String,
-    factoryAddress: String,
-    onResult: (Pair<String, String>) -> Unit
+    onResult: (String, String, String) -> Unit
 ) {
     val client = EthereumClient().newEthereumClient(BuildConfig.RPC_STRING)
 
     try {
-        val accountAddress = client.getPredictedAccountAddress(privateKey, eventId, factoryAddress)
+        val accountAddress = client.getPredictedAccountAddress(privateKey, BuildConfig.EVENT_ID_STRING, BuildConfig.SMART_ACCOUNT_FACTORY_ADDRESS)
+        val ethAccountAddress = client.getEthAddress(privateKey, BuildConfig.CHAIN_ID)
         val accountBalance = client.getContractBalance(accountAddress)
 
-        onResult(Pair(accountAddress, accountBalance))
+        onResult(accountAddress, ethAccountAddress, accountBalance)
     } catch (e: Exception) {
         showToast(context, "Failed to fetch account address.")
         Log.d("GetPredictedAccountAddress", "Failed to fetch account address: $e")
+    }
+}
+
+fun getSendETHInputs(
+    privateKey: String,
+    receiver: String,
+    amount: String,
+    onResult: (String) -> Unit
+) {
+    val client = EthereumClient().newEthereumClient(BuildConfig.RPC_STRING)
+
+    try {
+        val accountAddress = client.getAccountDeployed(privateKey, BuildConfig.EVENT_ID_STRING, BuildConfig.SMART_ACCOUNT_FACTORY_ADDRESS)
+
+        val inputs = client.getSendETHInputs(
+            privateKey,
+            BuildConfig.EVENT_ID_STRING,
+            receiver,
+            amount,
+            accountAddress,
+            BuildConfig.SMART_ACCOUNT_FACTORY_ADDRESS,
+            BuildConfig.ENTRY_POINT_ADDRESS
+        )
+
+        onResult(inputs)
+    } catch (e: Exception) {
+        Log.d("GetSendETHInputs", "Failed to fetch inputs: $e")
+    }
+}
+
+fun sendETH(
+    privateKey: String,
+    receiver: String,
+    amount: String,
+    proof: String,
+    onResult: (String) -> Unit
+) {
+    val client = EthereumClient().newEthereumClient(BuildConfig.RPC_STRING)
+
+    try {
+        val accountAddress = client.getAccountDeployed(privateKey, BuildConfig.EVENT_ID_STRING, BuildConfig.SMART_ACCOUNT_FACTORY_ADDRESS)
+
+        val inputs = client.sendETH(
+            privateKey,
+            BuildConfig.CHAIN_ID,
+            BuildConfig.EVENT_ID_STRING,
+            receiver,
+            amount,
+            accountAddress,
+            BuildConfig.SMART_ACCOUNT_FACTORY_ADDRESS,
+            BuildConfig.ENTRY_POINT_ADDRESS,
+            proof
+        )
+
+        onResult(inputs)
+    } catch (e: Exception) {
+        Log.d("sendETH", "Failed to send transaction: $e")
     }
 }
 

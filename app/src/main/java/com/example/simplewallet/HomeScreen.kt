@@ -110,7 +110,7 @@ fun CopyableAccountAddressText(accountAddress: String?) {
 }
 
 @Composable
-fun AccountBar(accountAddress: String?, accountBalance: String, modifier: Modifier = Modifier) {
+fun AccountBar(accountAddress: String?, ethAccountAddress: String?, accountBalance: String, modifier: Modifier = Modifier) {
     OutlinedCard(
         modifier = modifier
             .fillMaxWidth()
@@ -133,6 +133,14 @@ fun AccountBar(accountAddress: String?, accountBalance: String, modifier: Modifi
             )
 
             CopyableAccountAddressText(accountAddress)
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 16.dp),
+                thickness = 2.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+            )
+
+            CopyableAccountAddressText(ethAccountAddress)
         }
     }
 }
@@ -278,24 +286,27 @@ fun HomeScreen(
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
 
     var accountAddress by rememberSaveable { mutableStateOf(getAccountAddress(context)) }
+    var ethAccountAddress by rememberSaveable { mutableStateOf(getEthAccountAddress(context)) }
     var accountBalance by rememberSaveable { mutableStateOf(getAccountBalance(context)) }
 
     // Fetch account address and balance function
     fun fetchAccountData() {
-        if (accountAddress != null || isRefreshing) return
+        if (accountAddress != null && ethAccountAddress != null && isRefreshing) return
 
         isRefreshing = true
         getPredictedAccountAddressAndBalance(
             context = context,
-            privateKey = privateKey,
-            eventId = BuildConfig.EVENT_ID_STRING,
-            factoryAddress = BuildConfig.SMART_ACCOUNT_FACTORY_ADDRESS
-        ) { result ->
-            accountAddress = result.first
-            accountBalance = result.second
+            privateKey = privateKey
+        ) { resAccountAddress, resEthAccountAddress, resAccountBalance ->
+            accountAddress = resAccountAddress
+            ethAccountAddress = resEthAccountAddress
+            accountBalance = resAccountBalance
 
-            saveAccountAddress(context, result.first)
-            saveAccountBalance(context, result.second)
+            saveAccountAddress(context, resAccountAddress)
+            saveEthAccountAddress(context, resEthAccountAddress)
+            saveAccountBalance(context, resAccountBalance)
+
+            Log.d("HomeScreen", "ethAccountAddress: $ethAccountAddress")
 
             isRefreshing = false
         }
@@ -322,6 +333,7 @@ fun HomeScreen(
         ) {
             AccountBar(
                 accountAddress = accountAddress,
+                ethAccountAddress = ethAccountAddress,
                 accountBalance = accountBalance,
                 modifier = Modifier.paddingFromBaseline(top = 4.dp, bottom = 4.dp)
             )
@@ -354,6 +366,7 @@ fun AccountRowPreview() {
 fun AccountBarPreview() {
     AccountBar(
         accountAddress = "0xf41ceE234219D6cc3d90A6996dC3276aD378cfCF",
+        ethAccountAddress = "0xf41ceE234219D6cc3d90A6996dC3276aD378cfCF",
         accountBalance = "0.5 ETH"
     )
 }

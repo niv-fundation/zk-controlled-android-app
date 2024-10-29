@@ -1,6 +1,9 @@
 package com.example.simplewallet
 
 object BuildConfig {
+    val ETH_ACCOUNT_ADDRESS_KEY: String
+        get() = "eth_account_address"
+
     val ACCOUNT_BALANCE_KEY: String
         get() = "account_balance"
 
@@ -25,8 +28,14 @@ object BuildConfig {
     val RPC_STRING: String
         get() = "https://rpc.qtestnet.org"
 
+    val CHAIN_ID: String
+        get() = "35443"
+
     val SMART_ACCOUNT_FACTORY_ADDRESS: String
-        get() = "0x76C9b5c8Bc736e58F5b54BA721571c77059CAa68"
+        get() = "0x42815C0d33E67093A882B7CAE6a8dC466D77480c"
+
+    val ENTRY_POINT_ADDRESS: String
+        get() = "0x2De3b5aD89824C2eB15140121629c36025AD218b"
 
     val EVENT_ID_STRING: String
         get() = "5"
