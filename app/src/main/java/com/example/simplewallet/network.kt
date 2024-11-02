@@ -85,7 +85,8 @@ fun getSendETHInputs(
             amount,
             accountAddress,
             BuildConfig.SMART_ACCOUNT_FACTORY_ADDRESS,
-            BuildConfig.ENTRY_POINT_ADDRESS
+            BuildConfig.ENTRY_POINT_ADDRESS,
+            BuildConfig.PAYMASTER_ADDRESS
         )
 
         onResult(inputs)
@@ -99,7 +100,8 @@ fun sendETH(
     receiver: String,
     amount: String,
     proof: String,
-    onResult: (String) -> Unit
+    onResult: (String) -> Unit,
+    onFailure: () -> Unit
 ) {
     val client = EthereumClient().newEthereumClient(BuildConfig.RPC_STRING)
 
@@ -115,12 +117,15 @@ fun sendETH(
             accountAddress,
             BuildConfig.SMART_ACCOUNT_FACTORY_ADDRESS,
             BuildConfig.ENTRY_POINT_ADDRESS,
+            BuildConfig.PAYMASTER_ADDRESS,
             proof
         )
 
         onResult(inputs)
     } catch (e: Exception) {
         Log.d("sendETH", "Failed to send transaction: $e")
+
+        onFailure()
     }
 }
 

@@ -26,16 +26,19 @@ object BuildConfig {
         get() = "com.example.simplewallet"
 
     val RPC_STRING: String
-        get() = "https://rpc.qtestnet.org"
+        get() = "https://eth-sepolia.g.alchemy.com/v2/-Jm280LvZnniBfiaxZtQa_wL1b_okXCZ"
 
     val CHAIN_ID: String
-        get() = "35443"
+        get() = "11155111"
 
     val SMART_ACCOUNT_FACTORY_ADDRESS: String
-        get() = "0x42815C0d33E67093A882B7CAE6a8dC466D77480c"
+        get() = "0xeF0aB9F24f826657E11B6b4E3a682ee46254A22C"
 
     val ENTRY_POINT_ADDRESS: String
-        get() = "0x2De3b5aD89824C2eB15140121629c36025AD218b"
+        get() = "0x0000000071727De22E5E9d8BAf0edAc6f37da032"
+
+    val PAYMASTER_ADDRESS: String
+        get() = "0xe8CCF8dd49e297C357FDc1f84f9A6E2FED83C426"
 
     val EVENT_ID_STRING: String
         get() = "5"
