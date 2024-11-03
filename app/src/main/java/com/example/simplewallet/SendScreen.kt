@@ -55,12 +55,21 @@ suspend fun handleSendEthClick(
         return
     }
 
+    val uoStr = withContext(Dispatchers.Default) {
+        getUO(privateKey, recipientAddress, amount)
+    }
+
     onPhaseChange("Generating zero-knowledge proof")
-    val inputJson = getSendETHInputsSuspend(privateKey, recipientAddress, amount)
+    val inputJson = withContext(Dispatchers.Default) {
+        getSendETHInputsSuspend(
+            privateKey,
+            uoStr
+        )
+    }
 
     val inputs = AuthProofInput.fromJson(inputJson)
 
-    val proof = withContext(Dispatchers.IO) {
+    val proof = withContext(Dispatchers.Default) {
         ZKPUseCase(context, context.assets).generateZKP(
             "IdentityAuth.zkey",
             R.raw.auth_dat,
@@ -76,27 +85,70 @@ suspend fun handleSendEthClick(
         isTransactionComplete = state
     }
 
-    sendETHSuspend(privateKey, recipientAddress, amount, proof.proof.toJson(), onTransactionStateChange)
+    val uoHash = withContext(Dispatchers.Default) {
+        sendETHSuspend(
+            uoStr,
+            proof.proof.toJson(),
+            onTransactionStateChange
+        )
+    }
+
+    if (isTransactionComplete) {
+        onPhaseChange("Waiting for confirmation")
+        var isUOConfirmed = false
+        var maxRetries = 3
+
+        while (!isUOConfirmed && maxRetries > 0) {
+            delay(2000)
+            isUOConfirmed = withContext(Dispatchers.Default) { isUOConfirmed(uoHash) }
+            maxRetries--
+        }
+    }
 
     onTransactionComplete(isTransactionComplete)
 }
 
-// Wrapper suspend functions for getSendETHInputs and sendETH
-suspend fun getSendETHInputsSuspend(privateKey: String, recipientAddress: String, amount: String): String =
+suspend fun getUO(
+    privateKey: String,
+    receiver: String,
+    amount: String
+): String =
     suspendCoroutine { cont ->
-        getSendETHInputs(privateKey, recipientAddress, amount, onResult = { result ->
+        getUO(privateKey, receiver, amount, onResult = { result ->
             cont.resume(result)
         })
     }
 
-suspend fun sendETHSuspend(privateKey: String, recipientAddress: String, amount: String, proofJson: String, onTransactionStateChange: (Boolean) -> Unit): String =
+// Wrapper suspend functions for getSendETHInputs and sendETH
+suspend fun getSendETHInputsSuspend(
+    privateKey: String,
+    uoStr: String
+): String =
     suspendCoroutine { cont ->
-        sendETH(privateKey, recipientAddress, amount, proofJson, onResult = { txHash ->
+        getSendETHInputs(privateKey, uoStr, onResult = { result ->
+            cont.resume(result)
+        })
+    }
+
+suspend fun sendETHSuspend(
+    uoStr: String,
+    proofJson: String,
+    onTransactionStateChange: (Boolean) -> Unit
+): String =
+    suspendCoroutine { cont ->
+        sendETH(uoStr, proofJson, onResult = { txHash ->
             onTransactionStateChange(true)
             cont.resume(txHash)
         }, onFailure = {
             onTransactionStateChange(false)
             cont.resume("")
+        })
+    }
+
+suspend fun isUOConfirmed(uoHash: String): Boolean =
+    suspendCoroutine { cont ->
+        isUOConfirmed(uoHash, onResult = { result ->
+            cont.resume(result)
         })
     }
 
@@ -178,6 +230,7 @@ fun SendScreen(modifier: Modifier = Modifier) {
                     isTransactionComplete = false
                     currentPhase = "Initializing transaction"
 
+
                     handleSendEthClick(
                         context,
                         recipientAddress,
@@ -222,7 +275,12 @@ fun formatEthAmount(amount: String): String {
 }
 
 @Composable
-fun DialogModule(isTransactionComplete: Boolean, isTransactionSuccessful: Boolean, currentPhase: String, onDismissRequest: () -> Unit) {
+fun DialogModule(
+    isTransactionComplete: Boolean,
+    isTransactionSuccessful: Boolean,
+    currentPhase: String,
+    onDismissRequest: () -> Unit
+) {
     Dialog(onDismissRequest = {
         onDismissRequest()
     }) {
@@ -232,7 +290,9 @@ fun DialogModule(isTransactionComplete: Boolean, isTransactionSuccessful: Boolea
             modifier = Modifier.wrapContentSize()
         ) {
             Column(
-                modifier = Modifier.padding(16.dp).size(220.dp),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .size(220.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -278,23 +338,39 @@ fun SendScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun DialogModulePreview() {
-    DialogModule(isTransactionComplete = false, isTransactionSuccessful = true, currentPhase = "Initializing transaction", onDismissRequest = {})
+    DialogModule(
+        isTransactionComplete = false,
+        isTransactionSuccessful = true,
+        currentPhase = "Initializing transaction",
+        onDismissRequest = {})
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DialogModulePreviewBig() {
-    DialogModule(isTransactionComplete = false, isTransactionSuccessful = true, currentPhase = "Generating zero-knowledge proof", onDismissRequest = {})
+    DialogModule(
+        isTransactionComplete = false,
+        isTransactionSuccessful = true,
+        currentPhase = "Generating zero-knowledge proof",
+        onDismissRequest = {})
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DialogModulePreviewComplete() {
-    DialogModule(isTransactionComplete = true, isTransactionSuccessful = true, currentPhase = "Transaction completed", onDismissRequest = {})
+    DialogModule(
+        isTransactionComplete = true,
+        isTransactionSuccessful = true,
+        currentPhase = "Transaction completed",
+        onDismissRequest = {})
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DialogModulePreviewFailed() {
-    DialogModule(isTransactionComplete = true, isTransactionSuccessful = false, currentPhase = "Transaction failed", onDismissRequest = {})
+    DialogModule(
+        isTransactionComplete = true,
+        isTransactionSuccessful = false,
+        currentPhase = "Transaction failed",
+        onDismissRequest = {})
 }

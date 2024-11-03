@@ -67,7 +67,7 @@ fun getPredictedAccountAddressAndBalance(
     }
 }
 
-fun getSendETHInputs(
+fun getUO(
     privateKey: String,
     receiver: String,
     amount: String,
@@ -78,15 +78,36 @@ fun getSendETHInputs(
     try {
         val accountAddress = client.getAccountDeployed(privateKey, BuildConfig.EVENT_ID_STRING, BuildConfig.SMART_ACCOUNT_FACTORY_ADDRESS)
 
-        val inputs = client.getSendETHInputs(
+        val userOpStr = client.getUO(
             privateKey,
             BuildConfig.EVENT_ID_STRING,
             receiver,
             amount,
             accountAddress,
             BuildConfig.SMART_ACCOUNT_FACTORY_ADDRESS,
-            BuildConfig.ENTRY_POINT_ADDRESS,
             BuildConfig.PAYMASTER_ADDRESS
+        )
+
+        onResult(userOpStr)
+    } catch (e: Exception) {
+        Log.d("getUO", "Failed to get UO: $e")
+    }
+}
+
+
+fun getSendETHInputs(
+    privateKey: String,
+    uoStr: String,
+    onResult: (String) -> Unit
+) {
+    val client = EthereumClient().newEthereumClient(BuildConfig.RPC_STRING)
+
+    try {
+        val inputs = client.getSendETHInputs(
+            privateKey,
+            BuildConfig.EVENT_ID_STRING,
+            uoStr,
+            BuildConfig.ENTRY_POINT_ADDRESS
         )
 
         onResult(inputs)
@@ -96,9 +117,7 @@ fun getSendETHInputs(
 }
 
 fun sendETH(
-    privateKey: String,
-    receiver: String,
-    amount: String,
+    uoStr: String,
     proof: String,
     onResult: (String) -> Unit,
     onFailure: () -> Unit
@@ -106,16 +125,8 @@ fun sendETH(
     val client = EthereumClient().newEthereumClient(BuildConfig.RPC_STRING)
 
     try {
-        val accountAddress = client.getAccountDeployed(privateKey, BuildConfig.EVENT_ID_STRING, BuildConfig.SMART_ACCOUNT_FACTORY_ADDRESS)
-
         val inputs = client.sendETH(
-            privateKey,
-            BuildConfig.CHAIN_ID,
-            BuildConfig.EVENT_ID_STRING,
-            receiver,
-            amount,
-            accountAddress,
-            BuildConfig.SMART_ACCOUNT_FACTORY_ADDRESS,
+            uoStr,
             BuildConfig.ENTRY_POINT_ADDRESS,
             BuildConfig.PAYMASTER_ADDRESS,
             proof
@@ -126,6 +137,22 @@ fun sendETH(
         Log.d("sendETH", "Failed to send transaction: $e")
 
         onFailure()
+    }
+}
+
+fun isUOConfirmed(
+    uoHash: String,
+    onResult: (Boolean) -> Unit
+) {
+    val client = EthereumClient().newEthereumClient(BuildConfig.RPC_STRING)
+
+    try {
+        val result = client.isUOConfirmed(uoHash)
+
+        onResult(result)
+    } catch (e: Exception) {
+        Log.d("IsUOConfirmed", "Failed to get UO confirmation: $e")
+        onResult(false)
     }
 }
 

@@ -26,7 +26,7 @@ object BuildConfig {
         get() = "com.example.simplewallet"
 
     val RPC_STRING: String
-        get() = "https://eth-sepolia.g.alchemy.com/v2/-Jm280LvZnniBfiaxZtQa_wL1b_okXCZ"
+        get() = "https://eth-sepolia.g.alchemy.com/v2/txyNeRT9NeJWO7iox4uWdD5B8Qk7fI2a"
 
     val CHAIN_ID: String
         get() = "11155111"
