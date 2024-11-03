@@ -96,10 +96,10 @@ suspend fun handleSendEthClick(
     if (isTransactionComplete) {
         onPhaseChange("Waiting for confirmation")
         var isUOConfirmed = false
-        var maxRetries = 3
+        var maxRetries = 200
 
         while (!isUOConfirmed && maxRetries > 0) {
-            delay(2000)
+            delay(5000)
             isUOConfirmed = withContext(Dispatchers.Default) { isUOConfirmed(uoHash) }
             maxRetries--
         }
