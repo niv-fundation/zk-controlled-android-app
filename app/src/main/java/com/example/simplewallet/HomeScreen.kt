@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,7 +49,10 @@ import dev.materii.pullrefresh.PullRefreshIndicator
 import dev.materii.pullrefresh.pullRefresh
 import dev.materii.pullrefresh.rememberPullRefreshState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 @Composable
 fun AccountRow(accountTitle: String, accountBalance: String, modifier: Modifier = Modifier) {
@@ -139,6 +143,28 @@ fun AccountBar(accountAddress: String?, accountBalance: String, modifier: Modifi
     }
 }
 
+// // Wrapper suspend functions for getSendETHInputs and sendETH
+//suspend fun getSendETHInputsSuspend(
+//    privateKey: String,
+//    uoStr: String
+//): String =
+//    suspendCoroutine { cont ->
+//        getSendETHInputs(privateKey, uoStr, onResult = { result ->
+//            cont.resume(result)
+//        })
+//    }
+
+suspend fun getTransactionHistorySuspend(
+    accountAddress: String,
+    offset: Int,
+    limit: Int
+): List<TransactionLog> =
+    suspendCoroutine { cont ->
+        getTransactionHistory(accountAddress, offset, limit) { result ->
+            cont.resume(result)
+        }
+    }
+
 @Composable
 fun TransactionHistory(
     accountAddress: String?,
@@ -150,12 +176,15 @@ fun TransactionHistory(
     var offset by rememberSaveable { mutableIntStateOf(0) }
     val limit = 10
 
+    val coroutineScope = rememberCoroutineScope()
+
     fun fetchTransactionHistory() {
         if (isLoading || !hasMoreData || accountAddress == null) return
 
         isLoading = true
 
-        getTransactionHistory(accountAddress, offset, limit) { newTransactions ->
+        coroutineScope.launch {
+            val newTransactions = getTransactionHistorySuspend(accountAddress, offset, limit)
             if (newTransactions.isEmpty()) {
                 hasMoreData = false
             } else {
@@ -168,7 +197,11 @@ fun TransactionHistory(
 
     LaunchedEffect(Unit, accountAddress) {
         if (accountAddress != null) {
-            fetchTransactionHistory()
+            coroutineScope.launch {
+                withContext(Dispatchers.Default) {
+                    fetchTransactionHistory()
+                }
+            }
         }
     }
 
@@ -192,7 +225,11 @@ fun TransactionHistory(
                 item {
                     CircularProgressIndicator(modifier = Modifier.padding(16.dp))
                     LaunchedEffect(Unit) {
-                        fetchTransactionHistory()
+                        coroutineScope.launch {
+                            withContext(Dispatchers.Default) {
+                                fetchTransactionHistory()
+                            }
+                        }
                     }
                 }
             }
