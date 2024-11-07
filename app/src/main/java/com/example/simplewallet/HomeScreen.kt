@@ -143,17 +143,6 @@ fun AccountBar(accountAddress: String?, accountBalance: String, modifier: Modifi
     }
 }
 
-// // Wrapper suspend functions for getSendETHInputs and sendETH
-//suspend fun getSendETHInputsSuspend(
-//    privateKey: String,
-//    uoStr: String
-//): String =
-//    suspendCoroutine { cont ->
-//        getSendETHInputs(privateKey, uoStr, onResult = { result ->
-//            cont.resume(result)
-//        })
-//    }
-
 suspend fun getTransactionHistorySuspend(
     accountAddress: String,
     offset: Int,
@@ -330,9 +319,8 @@ fun HomeScreen(
         ) { resAccountAddress, resEthAccountAddress, resAccountBalance ->
             accountAddress = resAccountAddress
             accountBalance = resAccountBalance
-
+            
             saveAccountAddress(context, resAccountAddress)
-            saveEthAccountAddress(context, resEthAccountAddress)
             saveAccountBalance(context, resAccountBalance)
 
             isRefreshing = false

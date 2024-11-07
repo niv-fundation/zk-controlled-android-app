@@ -95,21 +95,6 @@ fun getAccountAddress(context: Context): String? {
     return sharedPreferences.getString(BuildConfig.ACCOUNT_ADDRESS_KEY, null)
 }
 
-fun saveEthAccountAddress(context: Context, ethAccountAddress: String) {
-    val sharedPreferences =
-        context.getSharedPreferences(BuildConfig.APP_PREFERENCES, Context.MODE_PRIVATE)
-    with(sharedPreferences.edit()) {
-        putString(BuildConfig.ETH_ACCOUNT_ADDRESS_KEY, ethAccountAddress)
-        apply()
-    }
-}
-
-fun getEthAccountAddress(context: Context): String? {
-    val sharedPreferences =
-        context.getSharedPreferences(BuildConfig.APP_PREFERENCES, Context.MODE_PRIVATE)
-    return sharedPreferences.getString(BuildConfig.ETH_ACCOUNT_ADDRESS_KEY, null)
-}
-
 fun saveAccountBalance(context: Context, accountBalance: String) {
     val sharedPreferences =
         context.getSharedPreferences(BuildConfig.APP_PREFERENCES, Context.MODE_PRIVATE)

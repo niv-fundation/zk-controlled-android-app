@@ -65,29 +65,6 @@ fun App() {
     var isBiometricSupported by remember { mutableStateOf(false) }
     var isAuthenticated by rememberSaveable { mutableStateOf(false) }
 
-//    LaunchedEffect(Unit) {
-//        withContext(Dispatchers.Default) {
-//            val input = AuthProofInput(
-//                skI = "10294389393062768729385114272199841316649911726454061560509573309549756959666",
-//                eventID = "5",
-//                messageHash = "13340980865108578023729260889913910942608023953420227864452550051784760977379",
-//                signatureR8x = "2219620931074135295298562935610427153265311869112466120792985987361809794174",
-//                signatureR8y = "6874592126905485210199822599351206798719043154484138943505165137062408985995",
-//                signatureS = "1808649777735465551464980702439997373577352451918028021190311136991955101595"
-//            )
-//
-//            Log.d("MainActivity", "input: ${input.toJson()}")
-//            val kek = ZKPUseCase(context, context.assets).generateZKP(
-//                "IdentityAuth.zkey",
-//                R.raw.auth_dat,
-//                input.toJson().toByteArray(),
-//                ZKPUtil::auth
-//            )
-//
-//            Log.d("MainActivity", "kek: ${GsonBuilder().setPrettyPrinting().create().toJson(kek)}")
-//        }
-//    }
-
     LaunchedEffect(Unit) {
         val privateKey = withContext(Dispatchers.IO) {
             getPrivateKey(context)
